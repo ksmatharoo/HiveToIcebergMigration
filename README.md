@@ -11,6 +11,7 @@ Steps to start docker
 
    $ root@hive-metastore:/opt# ifconfig       //use this ip address as thrift server ip in code and test
 4. get the nameNode ip address using same commands and add this to /etc/hosts files 
+5. browse name node using http://<nameNodeIp>:50070/dfshealth.html#tab-overview
 
 
 Code provide more control over existing iceberg migration by providing 2 wrapper class
