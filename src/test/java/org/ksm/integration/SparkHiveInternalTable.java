@@ -1,8 +1,6 @@
 package org.ksm.integration;
 
 import junit.framework.TestCase;
-import lombok.extern.log4j.Log4j2;
-import org.apache.hadoop.hive.metastore.api.AlreadyExistsException;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
@@ -17,25 +15,27 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
-
-@Log4j2
-public class SparkUtilsTest extends TestCase {
+public class SparkHiveInternalTable extends TestCase {
 
     @Test
-    public void testDecimal() {
+    public void test(){
+
+        System.out.println("");
+
         try {
             String warehousePath = System.getProperty("user.dir") + "/data/";
+
             String thriftServer = "thrift://172.18.0.5:9083";
 
-            String tableName = "decimal_test_false";
-            String dbname = "testksm";
+            //String tableName = "decimal_test_hive_false";
+            String tableName = "decimal_test_k_1";
+            String dbname = "default";
             String partitionKeys = "name";
             String basePath = warehousePath + tableName;
 
             SparkSession session = Utils.getSparkSession(warehousePath, thriftServer);
-            session.sql("show tables").show(false);
+            session.sql("SELECT * FROM my_parquet_hive_table").show();
 
-            session.sql("select * from testksm." + tableName).show(false);
 
             StructType schema = DataTypes.createStructType(new StructField[]{
                     DataTypes.createStructField("name", DataTypes.StringType, true),
@@ -52,18 +52,39 @@ public class SparkUtilsTest extends TestCase {
 
             // Create a DataFrame with the specified schema and data
             Dataset<Row> dataset = session.createDataFrame(data, schema);
-            session.sql("create database if not exists " + dbname).show(false);
-            MigrationHiveToIceberg.createAndLoadHiveTable(session, dataset, tableName, dbname, basePath, partitionKeys);
+
+
+            //session.sql("create database if not exists " + dbname).show(false);
+
+            dataset.createOrReplaceTempView("my_temp_view");
+
+            // Execute Hive SQL to create a Hive table from the DataFrame
+            // Execute Hive SQL to create a Hive table from the DataFrame with Parquet format
+            session.sql("CREATE TABLE IF NOT EXISTS my_parquet_hive_table " +
+                    "USING PARQUET " +
+                    "AS SELECT * FROM my_temp_view");
+
+            // Show the data in the Hive table
+            session.sql("SELECT * FROM my_parquet_hive_table").show();
+
+
+            System.out.println();
+            //dataset.write().insertInto("default."+tableName);
+
+            // Register DataFrame as a temporary view
+            //dataset.createOrReplaceTempView("my_temp_view");
+
+            // Execute Hive SQL to create a Hive table
+            //session.sql("CREATE TABLE IF NOT EXISTS my_hive_table AS SELECT * FROM my_temp_view");
+
+            // Show the data in the Hive table
+            //session.sql("SELECT * FROM my_hive_table").show();
             System.out.println("");
         } catch (NoSuchTableException e) {
             throw new RuntimeException(e);
         } catch (Exception e) {
-            if (e instanceof AlreadyExistsException) {
-                log.warn(e.toString());
-            } else {
-                throw new RuntimeException(e);
-            }
+            throw new RuntimeException(e);
         }
-    }
 
+    }
 }

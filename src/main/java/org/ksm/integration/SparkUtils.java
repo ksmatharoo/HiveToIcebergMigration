@@ -114,10 +114,12 @@ public class SparkUtils {
         boolean bCustomManifestWrite = false;
         String tableName = "employee14";
         String namespace = "default";
-        String wareHousePath = "/home/ksingh/ksingh/IcebergTest/data";
+
+        String wareHousePath = "/home/ksm/github/HiveToIcebergMigration/data/";
+        String thriftServer = "thrift://172.18.0.5:9083";
 
 
-        SparkSession spark = Utils.getSparkSession();
+        SparkSession spark = Utils.getSparkSession(wareHousePath,thriftServer);
         //spark.sparkContext().setLogLevel("ALL");
 
 
@@ -130,7 +132,7 @@ public class SparkUtils {
 
         Map<String, String> properties = new HashMap<String, String>();
         properties.put("warehouse", wareHousePath);
-        properties.put("uri", "thrift://172.19.0.5:9083");
+        properties.put("uri", thriftServer);
 
 
         catalog.initialize("hive", properties);

@@ -60,14 +60,16 @@ public class MigrationHiveToIceberg {
 
 
     public static void main(String[] args) throws Exception {
+        String warehousePath = "/home/ksm/github/HiveToIcebergMigration/data/";
+        String thriftServer = "thrift://172.18.0.5:9083";
 
-        SparkSession spark = Utils.getSparkSession();
+        SparkSession spark = Utils.getSparkSession(warehousePath,thriftServer);
         //spark.sparkContext().setLogLevel("ALL");
 
-        String tableName = "testMigrationTable8";
+        String tableName = "testMigrationTable";
         String dbname = "testKsm";
         String partitionKeys = "hire_date,department_id";
-        String basePath = "/home/ksingh/ksingh/IcebergTest/data/" + tableName;
+        String basePath = warehousePath + tableName;
 
         spark.sql("create database if not exists "+dbname).show( false);
 
@@ -84,6 +86,4 @@ public class MigrationHiveToIceberg {
         log.info("{} files added to iceberg table {}",dataFileCount,fullTableName);
 
     }
-
-
 }

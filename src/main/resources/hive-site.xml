@@ -3,7 +3,7 @@
 <configuration>
 <property>
     <name>hive.metastore.uris</name>
-    <value>thrift://172.19.0.5:9083</value>
+    <value>thrift://172.18.0.5:9083</value>
     <description>If true, the metastore thrift interface will be secured with SASL.
         Clients must authenticate with Kerberos.</description>
 </property>
